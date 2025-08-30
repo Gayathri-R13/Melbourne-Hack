@@ -153,44 +153,55 @@ export default function EcoFactoryApp() {
           </TabsList>
 
           {Object.entries(stageOptions).map(([stage, options]) => (
-            <TabsContent key={stage} value={stage} className="space-y-4">
-              <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-lg">{stage.charAt(0).toUpperCase() + stage.slice(1)} Stage</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="mb-2">
-                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                      <span>Remaining Actions</span>
-                      <span>{remainingActions}/{totalActions}</span>
-                    </div>
-                    <Progress
-                      value={(remainingActions / totalActions) * 100}
-                      className="h-3"
-                    />
+          <TabsContent key={stage} value={stage} className="space-y-4">
+            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader className="flex flex-col items-center gap-2">
+                {/* Transport GIF */}
+                {stage === "transport" && (
+                  <img
+                    src="https://i.gifer.com/JOP.gif"
+                    alt="Transport Animation"
+                    className="w-24 h-24"
+                  />
+                )}
+                <CardTitle className="text-lg">
+                  {stage.charAt(0).toUpperCase() + stage.slice(1)} Stage
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="mb-2">
+                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                    <span>Remaining Actions</span>
+                    <span>{remainingActions}/{totalActions}</span>
                   </div>
+                  <Progress
+                    value={(remainingActions / totalActions) * 100}
+                    className="h-3"
+                  />
+                </div>
 
-                  <div className={`grid ${options.length === 3 ? "grid-cols-3" : "grid-cols-2"} gap-3`}>
-                    {options.map((option) => (
-                      <Button
-                        key={option.id}
-                        variant="outline"
-                        className="h-20 flex flex-col gap-1 bg-transparent"
-                        onClick={() => handleDecision(option.sustainable, option.actionCost)}
-                        disabled={remainingActions < option.actionCost}
-                      >
-                        {option.icon}
-                        <span className="text-xs text-center break-words whitespace-normal">{option.text}</span>
-                        <span className="text-[10px] text-muted-foreground">
-                          {option.actionCost} Action{option.actionCost > 1 ? "s" : ""}
-                        </span>
-                      </Button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          ))}
+                <div className={`grid ${options.length === 3 ? "grid-cols-3" : "grid-cols-2"} gap-3`}>
+                  {options.map((option) => (
+                    <Button
+                      key={option.id}
+                      variant="outline"
+                      className="h-20 flex flex-col gap-1 bg-transparent"
+                      onClick={() => handleDecision(option.sustainable, option.actionCost)}
+                      disabled={remainingActions < option.actionCost}
+                    >
+                      {option.icon}
+                      <span className="text-xs text-center break-words whitespace-normal">{option.text}</span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {option.actionCost} Action{option.actionCost > 1 ? "s" : ""}
+                      </span>
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        ))}
+
         </Tabs>
 
         {/* Personal Actions Tracker */}
