@@ -8,13 +8,18 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MessageCircle, Factory, CheckSquare, TrendingUp, Leaf, Recycle, Truck, Package } from "lucide-react"
 
-export default function EcoFactoryApp() {
-  const [sustainabilityScore, setSustainabilityScore] = useState(45)
-  const [completedActions, setCompletedActions] = useState(3)
-  const [totalActions] = useState(8)
-  const [currentStage, setCurrentStage] = useState("packaging")
 
-  const personalActions = [
+export default function EcoFactoryApp() {
+  const [sustainabilityScore, setSustainabilityScore] = useState(0)
+  const [completedActions, setCompletedActions] = useState(0)
+  const [totalActions] = useState(10)
+  const [currentStage, setCurrentStage] = useState("packaging")
+  const [emissionHistory, setEmissionHistory] = useState<number[]>([100])
+  const [co2Reduction, setCo2Reduction] = useState(0)      // starts at 0%
+  const [recyclingRate, setRecyclingRate] = useState(0)    // starts at 0%
+
+
+  const [personalActions, setPersonalActions] = useState([
     { id: 1, text: "Use reusable water bottle", completed: false },
     { id: 2, text: "Switch to LED bulbs", completed: false },
     { id: 3, text: "Reduce meat consumption", completed: false },
@@ -24,25 +29,41 @@ export default function EcoFactoryApp() {
     { id: 7, text: "Reduce plastic usage", completed: false },
     { id: 8, text: "Use renewable energy", completed: false },
     { id: 9, text: "Use tram instead of car", completed: false },
-    { id: 10, text: "Hang-dry clothes instead of using the dryer", completed: false }
-  ]
+    { id: 10, text: "Hang-dry clothes instead of using the dryer", completed: false },
+  ])
 
   const toggleAction = (id: number) => {
-    const action = personalActions.find((a) => a.id === id)
-    if (action) {
-      action.completed = !action.completed
-      const newCompleted = personalActions.filter((a) => a.completed).length
-      setCompletedActions(newCompleted)
-      setSustainabilityScore(Math.min(100, 0 + newCompleted * 10))
-    }
+    const updated = personalActions.map(action =>
+      action.id === id ? { ...action, completed: !action.completed } : action
+    )
+    setPersonalActions(updated)
+
+    const newCompleted = updated.filter(a => a.completed).length
+    setCompletedActions(newCompleted)
+    setSustainabilityScore(Math.min(100, newCompleted * 10))
   }
 
   const getEnvironmentGradient = () => {
     const progress = sustainabilityScore / 100
-    if (progress < 0.3) return "from-gray-400 via-gray-500 to-gray-600"
-    if (progress < 0.6) return "from-gray-300 via-green-200 to-green-300"
-    return "from-green-200 via-green-300 to-emerald-400"
+    if (progress < 0.3) return "from-gray-800 via-gray-600 to-gray-400"   // polluted
+    if (progress < 0.6) return "from-gray-400 via-green-300 to-green-400" // transition
+    return "from-green-400 via-emerald-400 to-lime-300"                   // healthy
   }
+  const packagingOptions = [
+    { id: 1, text: "Recyclable Packaging", sustainable: true },
+    { id: 2, text: "Biodegradable Packaging", sustainable: true },
+    { id: 3, text: "Standard Packaging", sustainable: false },
+  ]
+  const handleDecision = (sustainable: boolean) => {
+    if (sustainable) {
+      setCo2Reduction((prev) => Math.min(100, prev + 10))      // increase reduction
+      setRecyclingRate((prev) => Math.min(100, prev + 5))     // example increment
+    } else {
+      setCo2Reduction((prev) => Math.max(0, prev - 5))        // decrease if not sustainable
+      setRecyclingRate((prev) => Math.max(0, prev - 3))
+    }
+  }
+
 
   return (
     <div className={`min-h-screen bg-gradient-to-br ${getEnvironmentGradient()} transition-all duration-1000`}>
@@ -103,15 +124,29 @@ export default function EcoFactoryApp() {
                 <CardTitle className="text-lg">Packaging Stage</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <Button variant="outline" className="h-20 flex-col gap-2 bg-transparent">
-                    <Recycle className="h-6 w-6" />
-                    <span className="text-xs">Recyclable</span>
-                  </Button>
-                  <Button variant="outline" className="h-20 flex-col gap-2 bg-transparent">
-                    <Leaf className="h-6 w-6" />
-                    <span className="text-xs">Biodegradable</span>
-                  </Button>
+                <div className="grid grid-cols-3 gap-3">
+                  {packagingOptions.map((option) => (
+                    <Button
+                      key={option.id}
+                      variant="outline"
+                      className="h-20 flex flex-col gap-2 bg-transparent"
+                      onClick={() => {
+                        const lastEmission = emissionHistory[emissionHistory.length - 1]
+                        let newEmission
+                        if (option.sustainable) {
+                          newEmission = Math.max(0, lastEmission - 10)
+                        } else {
+                          newEmission = Math.min(100, lastEmission + 10)
+                        }
+                        setEmissionHistory([...emissionHistory, newEmission])
+                      }}
+                    >
+                      {option.sustainable ? <Leaf className="h-6 w-6" /> : <Factory className="h-6 w-6" />}
+                      <span className="text-xs text-center break-words whitespace-normal">
+                        {option.text}
+                      </span>
+                    </Button>
+                  ))}
                 </div>
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-2">Choose sustainable packaging materials</p>
