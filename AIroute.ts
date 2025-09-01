@@ -1,3 +1,5 @@
+// code not currently in use
+
 import { streamText } from "ai"
 import { xai } from "@ai-sdk/xai"
 import type { NextRequest } from "next/server"
